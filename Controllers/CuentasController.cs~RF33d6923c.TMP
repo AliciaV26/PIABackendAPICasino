@@ -1,0 +1,6 @@
+﻿namespace WebAPICasino.Controllers
+{
+    public class CuentasController
+    {
+    }
+}

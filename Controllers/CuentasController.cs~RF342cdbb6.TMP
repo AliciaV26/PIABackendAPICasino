@@ -1,0 +1,84 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using WebAPICasino.DTOs;
+
+namespace WebAPICasino.Controllers
+{
+    [ApiController]
+    [Route("cuentas")]
+    public class CuentasController : ControllerBase
+    {
+        private readonly UserManager<IdentityUser> userManager;
+        private readonly IConfiguration configuration;
+        private readonly SignInManager<IdentityUser> signInManager;
+
+        public CuentasController(UserManager<IdentityUser> userManager, IConfiguration configuration,
+            SignInManager<IdentityUser> signInManager)
+        {
+            this.userManager = userManager;
+            this.configuration = configuration;
+            this.signInManager = signInManager;
+        }
+
+        [HttpPost("registrar")]
+        public async Task<ActionResult<RespuestaAutenticacion>> Registrar(CredencialesUsuario credenciales)
+        {
+            var user = new IdentityUser { UserName = credenciales.Email, Email = credenciales.Email };
+            var result = await userManager.CreateAsync(user, credenciales.Password);
+
+            if (result.Succeeded)
+            {
+                return ConstruirToken(credenciales);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<RespuestaAutenticacion>> Login(CredencialesUsuario credencialesUsuario)
+        {
+            var result = await signInManager.PasswordSignInAsync(credencialesUsuario.Email,
+                credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                return ConstruirToken(credencialesUsuario);
+            }
+            else
+            {
+                return BadRequest("Login incorrecto");
+            }
+        }
+
+        private RespuestaAutenticacion ConstruirToken(CredencialesUsuario credencialesUsuario)
+        {
+            //En los claims se puede declarar cualquier variable (no se debe declarar información sensible)
+
+            var claims = new List<Claim>
+            {
+                new Claim("email", credencialesUsuario.Email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["keyjwt"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var expiration = DateTime.UtcNow.AddYears(1);
+
+            var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims,
+                expires: expiration, signingCredentials: creds);
+
+            return new RespuestaAutenticacion()
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(securityToken),
+                Expiration = expiration
+            };
+        }
+    }
+}
