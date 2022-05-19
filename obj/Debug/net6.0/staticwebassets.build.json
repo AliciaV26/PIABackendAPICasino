@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "ZswSPscTtyfKVBb60Qyt0ZL8/lDgxbqma+ZOKboZf/8=",
+  "Source": "WebAPICasino",
+  "BasePath": "_content/WebAPICasino",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "WebAPICasino\\wwwroot",
+      "Source": "WebAPICasino",
+      "ContentRoot": "C:\\Users\\alice\\source\\repos\\WebAPICasino\\WebAPICasino\\wwwroot\\",
+      "BasePath": "_content/WebAPICasino",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}
